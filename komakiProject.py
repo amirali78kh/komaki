@@ -122,6 +122,22 @@ class Ui_Komaki(object):
         self.label_11 = QtWidgets.QLabel(Komaki)
         self.label_11.setGeometry(QtCore.QRect(260, 430, 61, 20))
         self.label_11.setObjectName("label_11")
+        #__________New__________
+        self.text_font_size_label = QtWidgets.QLabel(Komaki)
+        self.text_font_size_label.setGeometry(QtCore.QRect(40, 360, 141, 16))
+        self.text_font_size_label.setObjectName("text_font_size_label")
+        self.dict_font_size_label = QtWidgets.QLabel(Komaki)
+        self.dict_font_size_label.setGeometry(QtCore.QRect(40, 390, 101, 16))
+        self.dict_font_size_label.setObjectName("dict_font_size_label")
+        self.text_font_size_value = QtWidgets.QSpinBox(Komaki)
+        self.text_font_size_value.setGeometry(QtCore.QRect(150, 360, 42, 22))
+        self.text_font_size_value.setProperty("value", 15)
+        self.text_font_size_value.setObjectName("text_font_size_value")
+        self.dict_font_size_value = QtWidgets.QSpinBox(Komaki)
+        self.dict_font_size_value.setGeometry(QtCore.QRect(150, 390, 42, 22))
+        self.dict_font_size_value.setProperty("value", 9)
+        self.dict_font_size_value.setObjectName("dict_font_size_value")
+        #__________New__________
 
         self.retranslateUi(Komaki)
         QtCore.QMetaObject.connectSlotsByName(Komaki)
@@ -154,6 +170,10 @@ class Ui_Komaki(object):
         self.select_file.clicked.connect(self.open_file_dialog)
         self.find.clicked.connect(self.checks_cefr_level)
         self.generate.clicked.connect(self.generate_button)
+        #__________New__________
+        self.text_font_size_label.setText(_translate("Komaki", "Text font size"))
+        self.dict_font_size_label.setText(_translate("Komaki", "Dictionary font size"))
+        #__________New__________
     
     def open_file_dialog(self):
         # Open file dialog
@@ -217,6 +237,9 @@ class Ui_Komaki(object):
 
     def run_generate_button(self):
         if self.word_radio.isChecked():
+            self.komaki_core.text_font_size = self.text_font_size_value.value()
+            self.komaki_core.dict_font_size = self.dict_font_size_value.value()
+            self.komaki_core.dict_font_size
             self.komaki_core.make_line_by_line(self.dictionary)
 
         if self.pdf_radio.isChecked():

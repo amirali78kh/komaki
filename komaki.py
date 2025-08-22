@@ -1,10 +1,8 @@
 import spacy
-import spacy.tokens
 #----------------------------
 from cefrpy import CEFRSpaCyAnalyzer,CEFRLevel
 #----------------------------
 import pymupdf
-import nltk
 #----------------------------
 from nltk.corpus import wordnet
 from nltk.corpus.reader.wordnet import NOUN, VERB, ADJ, ADV
@@ -18,6 +16,7 @@ import sys
 from docx import Document
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
+from docx.shared import Pt
 '''
 *Notes:
 **
@@ -41,12 +40,13 @@ class Komaki:
         self.file_full_name = os.path.basename(file_name)
         self.file_name_only = os.path.splitext(self.file_full_name)[0]
         self.dir = os.path.dirname(file_name)
-        try:
-            nltk.data.find('corpora/wordnet')
-        except LookupError:
-            nltk.download('wordnet')
+        # try:
+        #     nltk.data.find('corpora/wordnet')
+        # except LookupError:
+        #     nltk.download('wordnet')
         #loading spacy's model
-        self.nlp = spacy.load("en_core_web_lg")
+        # self.nlp = spacy.load("en_core_web_lg")
+        self.nlp = self.load_spacy_model()
         self.spacy_analyzer = CEFRSpaCyAnalyzer()
         #opening the file:
         #   pdf file:
@@ -58,7 +58,137 @@ class Komaki:
         self.margin = 20
         self.scale_factor_1 = 7
         self.scale_factor_2 = 8
+        self.text_font_size = 15
+        # 6/10 of text font size 
+        self.dict_font_size = 9
     
+    #1
+    # def load_spacy_model(self):
+    #     try:
+    #         # Try loading normally first
+    #         return spacy.load("en_core_web_lg")
+    #     except OSError:
+    #         # If that fails, try loading from the PyInstaller bundle
+    #         try:
+    #             if hasattr(sys, '_MEIPASS'):
+    #                 model_path = os.path.join(sys._MEIPASS, 'en_core_web_lg')
+    #                 return spacy.load(model_path)
+    #             else:
+    #                 raise
+    #         except:
+    #             # Fallback to a smaller model if available
+    #             try:
+    #                 return spacy.load("en_core_web_sm")
+    #             except:
+    #                 raise OSError("No spaCy model found. Please install en_core_web_lg or en_core_web_sm")
+    
+    #2
+    # def load_spacy_model(self):
+    #     model_names = ["en_core_web_lg", "en_core_web_sm"]
+        
+    #     for model_name in model_names:
+    #         try:
+    #             if hasattr(sys, '_MEIPASS'):
+    #                 # Running as PyInstaller bundle
+    #                 model_path = os.path.join(sys._MEIPASS, model_name)
+    #                 return spacy.load(model_path)
+    #             else:
+    #                 # Running normally
+    #                 return spacy.load(model_name)
+    #         except OSError:
+    #             continue
+        
+    #     raise OSError("No spaCy model found. Please install en_core_web_lg or en_core_web_sm")
+
+    #3
+    # def load_spacy_model(self):
+        
+    #     print("=== SpaCy Model Debug Info ===")
+        
+    #     if hasattr(sys, '_MEIPASS'):
+    #         print(f"Running in PyInstaller mode")
+    #         print(f"_MEIPASS path: {sys._MEIPASS}")
+            
+    #         # List everything in _MEIPASS
+    #         print("Contents of _MEIPASS:")
+    #         try:
+    #             for item in os.listdir(sys._MEIPASS):
+    #                 print(f"  {item}")
+    #                 if item.startswith('en_core_web'):
+    #                     item_path = os.path.join(sys._MEIPASS, item)
+    #                     if os.path.isdir(item_path):
+    #                         print(f"    Contents of {item}:")
+    #                         for subitem in os.listdir(item_path)[:10]:  # Show first 10 items
+    #                             print(f"      {subitem}")
+    #         except Exception as e:
+    #             print(f"Error listing _MEIPASS: {e}")
+    #     else:
+    #         print("Running in normal mode")
+        
+    #     model_names = ["en_core_web_lg", "en_core_web_sm"]
+        
+    #     for model_name in model_names:
+    #         print(f"\nTrying to load: {model_name}")
+    #         try:
+    #             if hasattr(sys, '_MEIPASS'):
+    #                 model_path = os.path.join(sys._MEIPASS, model_name)
+    #                 print(f"  Trying path: {model_path}")
+    #                 print(f"  Path exists: {os.path.exists(model_path)}")
+    #                 if os.path.exists(model_path):
+    #                     print(f"  Path contents: {os.listdir(model_path)[:5]}")
+    #                 return spacy.load(model_path)
+    #             else:
+    #                 print(f"  Loading normally: {model_name}")
+    #                 return spacy.load(model_name)
+    #         except Exception as e:
+    #             print(f"  Failed: {e}")
+    #             continue
+        
+    #     raise OSError("No spaCy model found. Please install en_core_web_lg or en_core_web_sm")
+
+    def load_spacy_model(self):
+
+        model_names = ["en_core_web_lg", "en_core_web_sm"]
+        
+        for model_name in model_names:
+            print(f"Trying to load: {model_name}")
+            
+            try:
+                # First try: Load from system installation (most reliable)
+                print(f"  Trying system installation...")
+                return spacy.load(model_name)
+            except OSError as e:
+                print(f"  System load failed: {e}")
+            
+            if hasattr(sys, '_MEIPASS'):
+                try:
+                    # Second try: Load from PyInstaller bundle
+                    model_path = os.path.join(sys._MEIPASS, model_name)
+                    print(f"  Trying PyInstaller bundle: {model_path}")
+                    if os.path.exists(model_path):
+                        return spacy.load(model_path)
+                except OSError as e:
+                    print(f"  Bundle load failed: {e}")
+            
+            try:
+                # Third try: Try to import as module and get path
+                print(f"  Trying module import...")
+                import importlib
+                mod = importlib.import_module(model_name)
+                return spacy.load(mod.__path__[0])
+            except Exception as e:
+                print(f"  Module import failed: {e}")
+        
+        # If all else fails, show clear instructions
+        raise OSError(f"""
+        No spaCy model found. Please install one by running:
+        
+        python -m spacy download en_core_web_lg
+        
+        Then run this program again. The model will be loaded from your system installation.
+        """)
+
+
     def get_pdf_pages(self,file_name):
         # print("get_pdf_pages function is ok!")
         doc = pymupdf.open(file_name)
@@ -66,6 +196,7 @@ class Komaki:
     
     def get_CEFR_level(self):
         levels_sum = 0.0
+        words_array = []
         filtered_tokens = []
         words_number = 0
         for page in self.book_pages:
@@ -92,6 +223,10 @@ class Komaki:
                     continue
 
                 # filtered_tokens.append(token_data)
+                if word in words_array:
+                    continue
+
+                words_array.append(word)
                 levels_sum += level
                 words_number += 1
                 # print(levels_sum , words_number)
@@ -312,6 +447,7 @@ class Komaki:
             words = sentence.split()
             for word in words:
                 run = paragraph.add_run(word + " ")
+                run.font.size = Pt(self.text_font_size)
                 #Change#1
                 if word.strip('.,!?\"\':;*()+=\\/<>}{][') in bold_words:
                     run.bold = True
@@ -331,6 +467,9 @@ class Komaki:
         for page_num, page in enumerate(self.book_pages):
             page_dic = pages_dic[page_num]
             text = page.get_text()
+            #_____FIXING_____
+            text = self.clean_extracted_text(text)
+            #_____FIXING_____
             doc = self.nlp(text)
             sents = ""
             for sent in doc.sents:
@@ -350,10 +489,20 @@ class Komaki:
                     for wrd in sent_dic:
                         para = docx.add_paragraph()
                         # making the difficult words bold
-                        para.add_run(f"{wrd}").bold = True
-                        para.add_run(f" : {page_dic[wrd]}")
+                        # run_word = para.add_run(f"{wrd}").bold = True
+                        
+                        run_word = para.add_run(f"{wrd}")
+                        run_word.font.size = Pt(self.dict_font_size)
+                        run_word.bold = True
+                        
+                        run_def = para.add_run(f" : {page_dic[wrd]}")
+                        run_def.font.size = Pt(self.dict_font_size)
+
                         set_paragraph_background(para)
-            main_para = docx.add_paragraph(sents)
+            # main_para = docx.add_paragraph(sents)
+            main_para = docx.add_paragraph()
+            run_main = main_para.add_run(sents)
+            run_main.font.size = Pt(self.text_font_size)
         docx.save(f"{self.dir}/{self.file_name_only}_komaki.docx")
                 
                     
@@ -369,17 +518,19 @@ class Komaki:
 
 
 if __name__ == "__main__":
-    file_name = "test5"
-    book = Komaki(f"D:\Python Projects\Spacy_exercise\Komaki\{file_name}.pdf")
-    # print(book.get_CEFR_level()[1],":",book.get_CEFR_level()[0])
+    # file_name = "test5"
+    file_name = input("Enter the address of the file:")
+    book = Komaki(file_name)
+    print(book.get_CEFR_level()[1],":",book.get_CEFR_level()[0])
     # print(book.get_difficult_words(book.get_CEFR_level()[0]))
     # print(book.get_difficult_words(4))
-    if not os.path.exists(f"{file_name}.json"):
+    print(book.file_name_only)
+    if not os.path.exists(f"{book.file_name_only}.json"):
         json_data = book.get_difficult_words(4)
-        with open(f"{file_name}.json","w") as file:
+        with open(f"{book.file_name_only}.json","w") as file:
             json.dump(json_data,file,indent=2)
-    with open(f"{file_name}.json","r") as f:
+    with open(f"{book.file_name_only}.json","r") as f:
         dictionary = json.load(f)
 
-    book.make_processed_pdf(dictionary)
-    # book.make_line_by_line(dictionary)
+    # book.make_processed_pdf(dictionary)
+    book.make_line_by_line(dictionary)
