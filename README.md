@@ -35,7 +35,7 @@ No more switching between your PDF and a dictionary — stay focused and enjoy r
 1. Clone the project:
 ```bash
    git clone https://github.com/amirali78kh/komaki.git
-```bash
+```
 2. install python and add pip to the path (python3 recommended)
 3. install vc_redist
 4. connect to the internet and run "setup.bat"
@@ -82,10 +82,10 @@ A perfect demonstration of my further
 1. ابتدا پروژه را کلون کنید:
 ```bash
    git clone https://github.com/amirali78kh/komaki.git
-   cd komaki
+```
 2. پایتون را نصب کنید و موقع نصب تیک زیر را بزنید (ترجیحا پایتون 3)
 add pip to the path
-3. پوشه زیر را نصب کنید
+3. نرم افزار زیر را نصب کنید
 vc_redist
 4. به اینترنت وصل شوید و فایل زیر را بزنید
 setup.bat
