@@ -40,6 +40,15 @@ No more switching between your PDF and a dictionary — stay focused and enjoy r
 3. install vc_redist
 4. connect to the internet and run "setup.bat"
 5. now you can run program with "run.bat"
+6. If you are unable to download the spaCy model and encounter an error while running setup.bat, you can manually download the model from the link below, extract it, and copy it into the project folder.
+
+https://github.com/amirali78kh/link-downloader/tree/main/downloads/en_core_web_md-3.8.0-py3-none-any
+
+Then, run the following command in the command prompt (cmd) opened inside the project folder (the easiest way is to click on the project folder's address bar, type cmd, and press Enter. This will open cmd in that directory).
+```bash
+pip install en_core_web_md-3.8.0-py3-none-any.whl
+python -c "import nltk; nltk.download('wordnet'); nltk.download('omw-1.4')"
+```
 
 ---
 
