@@ -92,5 +92,14 @@ vc_redist
 4. به اینترنت وصل شوید و فایل زیر را بزنید
 setup.bat
 5. با استفاده از فایل زیر میتوانید نرم افزار را اجرا کنید
-run.bat 
+run.bat
+6. اگر مدل spacy را نتوانستید دانلود کنید و موقع اجرای setup.bat ارور گرفتید، میتوانید مدل را از لینک زیر دستی دانلود کنید و آن را درون پوشه پروژه کپی کنید.
+
+https://github.com/amirali78kh/link-downloader/tree/main/downloads/en_core_web_md-3.8.0-py3-none-any
+
+سپس دستور زیر را درون cmd که درون پوشه پروژه باز شده است اجرا کنید ( راحتترین راه کلیک روی آدرس بار پروژه و تایپ کردن cmd و اینتر زدن است. این کار cmd را درون همان مسیر باز می کند.)
+```bash
+pip install en_core_web_md-3.8.0-py3-none-any.whl
+python -c "import nltk; nltk.download('wordnet'); nltk.download('omw-1.4')"
+```
    
