@@ -35,7 +35,7 @@ No more switching between your PDF and a dictionary — stay focused and enjoy r
 1. Clone the project:
 ```bash
    git clone https://github.com/amirali78kh/komaki.git
-   cd komaki
+```bash
 2. install python and add pip to the path (python3 recommended)
 3. install vc_redist
 4. connect to the internet and run "setup.bat"
