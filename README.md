@@ -46,7 +46,8 @@ No more switching between your PDF and a dictionary — stay focused and enjoy r
 ## example:
 A perfect demonstration of my further
 **degenerating** state of mind.
-**degenerating : drop/grow worse**
+
+   **degenerating : drop/grow worse**
 
 ---
 
@@ -73,6 +74,7 @@ A perfect demonstration of my further
 ## example:
 A perfect demonstration of my further
 **degenerating** state of mind.
+
 **degenerating : drop/grow worse**
 
 ---
