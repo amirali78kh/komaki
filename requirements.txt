@@ -1,8 +1,6 @@
-spacy==3.5.0
-https://github.com/explosion/spacy-models/releases/download/en_core_web_lg-3.5.0/en_core_web_lg-3.5.0-py3-none-any.whl
+spacy==3.8.0
 cefrpy==1.0.1
-pymupdf==1.25.5
+pymupdf==1.27.2
 nltk==3.9.1
 pyqt5==5.15.9
-pyqt5-tools==5.15.9.3.3
-python-docx==1.1.2
+python-docx==1.2.0

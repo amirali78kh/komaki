@@ -45,8 +45,8 @@ class Komaki:
         # except LookupError:
         #     nltk.download('wordnet')
         #loading spacy's model
-        # self.nlp = spacy.load("en_core_web_lg")
-        self.nlp = self.load_spacy_model()
+        self.nlp = spacy.load("en_core_web_md")
+        # self.nlp = self.load_spacy_model()
         self.spacy_analyzer = CEFRSpaCyAnalyzer()
         #opening the file:
         #   pdf file:
@@ -146,47 +146,47 @@ class Komaki:
         
     #     raise OSError("No spaCy model found. Please install en_core_web_lg or en_core_web_sm")
 
-    def load_spacy_model(self):
+    # def load_spacy_model(self):
 
-        model_names = ["en_core_web_lg", "en_core_web_sm"]
+    #     model_names = ["en_core_web_lg", "en_core_web_sm"]
         
-        for model_name in model_names:
-            print(f"Trying to load: {model_name}")
+    #     for model_name in model_names:
+    #         print(f"Trying to load: {model_name}")
             
-            try:
-                # First try: Load from system installation (most reliable)
-                print(f"  Trying system installation...")
-                return spacy.load(model_name)
-            except OSError as e:
-                print(f"  System load failed: {e}")
+    #         try:
+    #             # First try: Load from system installation (most reliable)
+    #             print(f"  Trying system installation...")
+    #             return spacy.load(model_name)
+    #         except OSError as e:
+    #             print(f"  System load failed: {e}")
             
-            if hasattr(sys, '_MEIPASS'):
-                try:
-                    # Second try: Load from PyInstaller bundle
-                    model_path = os.path.join(sys._MEIPASS, model_name)
-                    print(f"  Trying PyInstaller bundle: {model_path}")
-                    if os.path.exists(model_path):
-                        return spacy.load(model_path)
-                except OSError as e:
-                    print(f"  Bundle load failed: {e}")
+    #         if hasattr(sys, '_MEIPASS'):
+    #             try:
+    #                 # Second try: Load from PyInstaller bundle
+    #                 model_path = os.path.join(sys._MEIPASS, model_name)
+    #                 print(f"  Trying PyInstaller bundle: {model_path}")
+    #                 if os.path.exists(model_path):
+    #                     return spacy.load(model_path)
+    #             except OSError as e:
+    #                 print(f"  Bundle load failed: {e}")
             
-            try:
-                # Third try: Try to import as module and get path
-                print(f"  Trying module import...")
-                import importlib
-                mod = importlib.import_module(model_name)
-                return spacy.load(mod.__path__[0])
-            except Exception as e:
-                print(f"  Module import failed: {e}")
+    #         try:
+    #             # Third try: Try to import as module and get path
+    #             print(f"  Trying module import...")
+    #             import importlib
+    #             mod = importlib.import_module(model_name)
+    #             return spacy.load(mod.__path__[0])
+    #         except Exception as e:
+    #             print(f"  Module import failed: {e}")
         
-        # If all else fails, show clear instructions
-        raise OSError(f"""
-        No spaCy model found. Please install one by running:
+    #     # If all else fails, show clear instructions
+    #     raise OSError(f"""
+    #     No spaCy model found. Please install one by running:
         
-        python -m spacy download en_core_web_lg
+    #     python -m spacy download en_core_web_lg
         
-        Then run this program again. The model will be loaded from your system installation.
-        """)
+    #     Then run this program again. The model will be loaded from your system installation.
+    #     """)
 
 
     def get_pdf_pages(self,file_name):
@@ -333,7 +333,12 @@ class Komaki:
                                     sent_doc = self.nlp(sent.text)
                                     score = []
                                     for synset in synsets:
-                                        synset_doc = self.nlp(synset.definition())
+                                        #CHANGED
+                                        word_sense = synset.definition()
+                                        for example in synset.examples():
+                                            word_sense += " "+ example
+                                        synset_doc = self.nlp(word_sense)
+                                        #CHANGED
                                         similarity = sent_doc.similarity(synset_doc)
                                         score.append((synset,similarity))
                                     best_syn = sorted(score,key=lambda x: x[1], reverse=True)[0][0]
