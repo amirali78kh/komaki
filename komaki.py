@@ -302,6 +302,8 @@ class Komaki:
                 word,pos,is_skipped,level,start_pos,end_pos = token_data
                 if level is None:
                     continue
+                if pos == "PRON":
+                    continue
 
                     # Get the actual SpaCy token using the position
                 token = doc.char_span(start_pos, end_pos)
