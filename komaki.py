@@ -232,6 +232,8 @@ class Komaki:
                 # synset_definition_contexual = " ".join(placeholder)
                 # synset_doc = nlp(synset_definition_contexual)
                 #----------Extra step----------
+                if not synset_definition:
+                    continue
                 synset_doc = self.nlp(synset_definition)
                 synset_score = synset_doc.similarity(contexual_word_doc)
                 if synset_score > best_score or best_score == 0:
@@ -252,6 +254,8 @@ class Komaki:
                 best_sense = None
                 for target_word_synset in target_word_synsets:
                     synset_definition = target_word_synset.definition()
+                    if not synset_definition:
+                        continue
                     #----------Extra step----------
                     placeholder = get_contexual_words(synset_definition)
                     synset_definition_contexual = " ".join(placeholder)
