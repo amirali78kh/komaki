@@ -53,6 +53,8 @@ class Komaki:
         if file_name.endswith(".pdf"):
             self.book_pages = self.get_pdf_pages(file_name)
         
+        self.protect_labels = ["PER", "GPE", "ORG", "MISC", "NORP", "EVENT", "PRODUCT", "WORK_OF_ART"] # LOC is removed
+        
         #____Configurations____
         self.footer_font = 7
         self.margin = 20
@@ -188,7 +190,93 @@ class Komaki:
     #     Then run this program again. The model will be loaded from your system installation.
     #     """)
 
+    def get_best_synset(self, target_word,chosen_sentence,synsets):
+        target_word_synsets = synsets
 
+        def get_contexual_words(text:str,target_word:str = None):
+            if target_word != None:
+                target_word = target_word.lower()
+            doc = self.nlp(text)
+            contexual_arr= []
+            for token in doc:
+                if token.is_stop or token.is_punct or token.is_space or token.text.lower() == target_word:
+                    continue
+
+                word_lemma = token.lemma_
+
+                # if token.pos_ == "VERB":
+                #     for child in token.children:
+                #         if child.dep_ == "svp":
+                #             word_lemma = child.text+token.lemma_
+                contexual_arr.append(word_lemma)
+            return contexual_arr
+
+
+
+        contextual_words = get_contexual_words(chosen_sentence,target_word)
+
+        synset_dic = {}
+        for target_word_synset in target_word_synsets:
+            synset_dic[target_word_synset] = 0
+        # print(contextual_words)
+        #----------Step 1-----------
+        for contextual_word in contextual_words:
+            # print(contextual_word)####
+            best_score = 0
+            best_sense = None
+            for target_word_synset in target_word_synsets:
+                synset_definition = target_word_synset.definition()
+                contexual_word_doc = self.nlp(contextual_word)
+                #----------Extra step----------
+                # placeholder = get_contexual_words(synset_definition)
+                # synset_definition_contexual = " ".join(placeholder)
+                # synset_doc = nlp(synset_definition_contexual)
+                #----------Extra step----------
+                synset_doc = self.nlp(synset_definition)
+                synset_score = synset_doc.similarity(contexual_word_doc)
+                if synset_score > best_score or best_score == 0:
+                    best_score = synset_score
+                    best_sense = target_word_synset
+            if best_score != 0:
+                synset_dic[best_sense] += 1
+                # print(f"first: {contextual_word}: {best_sense.definition()}")
+        #----------Step 1-----------
+        #----------Step 2-----------
+        items = sorted(synset_dic.items(), key=lambda x: x[1], reverse=True)
+            
+            # If true, the values are the same
+        if len(items) >= 2 and items[0][1] == items[1][1]:
+            
+            for contextual_word in contextual_words:
+                best_score = 0
+                best_sense = None
+                for target_word_synset in target_word_synsets:
+                    synset_definition = target_word_synset.definition()
+                    #----------Extra step----------
+                    placeholder = get_contexual_words(synset_definition)
+                    synset_definition_contexual = " ".join(placeholder)
+                    synset_doc = self.nlp(synset_definition_contexual)
+                    #----------Extra step----------
+                    # synset_doc = nlp(synset_definition)
+                    contexual_word_doc = self.nlp(contextual_word)
+                    synset_score = synset_doc.similarity(contexual_word_doc)
+                    if synset_score > best_score or best_score == 0:
+                        best_score = synset_score
+                        best_sense = target_word_synset
+                if best_score != 0:
+                    synset_dic[best_sense] += 1
+                    # print(f"second:{contextual_word} {best_sense.definition()}")
+            items = sorted(synset_dic.items(), key=lambda x: x[1], reverse=True)
+            result = items[0][0]
+        else:
+            result = items[0][0]
+        return result
+        # print(result.definition())
+        #----------Step 2-----------
+    
+    
+    
+    
     def get_pdf_pages(self,file_name):
         # print("get_pdf_pages function is ok!")
         doc = pymupdf.open(file_name)
@@ -319,6 +407,9 @@ class Komaki:
                 # Filter out stop words, punctuations, digits
                 if token.is_stop or token.is_punct or token.like_num:
                     continue
+
+                if token.ent_type_ in self.protect_labels:
+                    continue
                 
                 # #__Troubleshooting CEFR levels of words__
                 # ts += f"{word}:{level}\n"
@@ -336,16 +427,16 @@ class Komaki:
                                 if sent.start_char <= start_pos < sent.end_char:
                                     sent_doc = self.nlp(sent.text)
                                     score = []
-                                    for synset in synsets:
-                                        #CHANGED
-                                        word_sense = synset.definition()
-                                        for example in synset.examples():
-                                            word_sense += " "+ example
-                                        synset_doc = self.nlp(word_sense)
-                                        #CHANGED
-                                        similarity = sent_doc.similarity(synset_doc)
-                                        score.append((synset,similarity))
-                                    best_syn = sorted(score,key=lambda x: x[1], reverse=True)[0][0]
+                                    # for synset in synsets:
+                                    #     #CHANGED
+                                    #     word_sense = synset.definition()
+                                    #     for example in synset.examples():
+                                    #         word_sense += " "+ example
+                                    #     synset_doc = self.nlp(word_sense)
+                                    #     #CHANGED
+                                    #     similarity = sent_doc.similarity(synset_doc)
+                                    #     score.append((synset,similarity))
+                                    best_syn = self.get_best_synset(token.text,sent.text,synsets)
                                     #__________________ get the best sysnonym for the best_syn
                                     synonyms = []
                                     similarity = 0
